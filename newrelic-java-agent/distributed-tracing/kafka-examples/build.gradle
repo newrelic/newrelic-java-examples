@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBoot}"
+    id 'io.spring.dependency-management' version "${dependencyManagement}"
+}
+
+repositories {
+    mavenCentral()
+}
+
+allprojects {
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+bootJar {
+    enabled = false
+}
