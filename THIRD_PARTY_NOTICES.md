@@ -16,7 +16,7 @@ by e-mailing [open-source@newrelic.com](mailto:open-source@newrelic.com).
 
 ### spring-boot
 
-This product includes source derived from [spring-boot](https://github.com/spring-projects/spring-boot) ([v0.00.1](https://github.com/spring-projects/spring-boot/tree/2.4.x)), distributed under the [Apache 2 License](https://github.com/spring-projects/spring-boot/blob/master/LICENSE.txt):
+This product includes source derived from [spring-boot](https://github.com/spring-projects/spring-boot) ([v2.4.x](https://github.com/spring-projects/spring-boot/tree/2.4.x)), distributed under the [Apache 2 License](https://github.com/spring-projects/spring-boot/blob/master/LICENSE.txt):
 
 ```
                                  Apache License
