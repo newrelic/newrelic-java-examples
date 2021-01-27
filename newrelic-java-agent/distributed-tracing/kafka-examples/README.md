@@ -141,9 +141,11 @@ A number of scripts have been provided in the `kafka_2.13-2.6.0/` directory to s
 
 ### Configure the New Relic Java agent
 
-Each service has its own `newrelic` directory containing the agent jar, agent api jar, and agent config yaml file:
+Each service has its own `newrelic` directory containing the agent jar and agent config yaml file:
 * `/path/to/kafka-examples/kafka-producer/newrelic/`
 * `/path/to/kafka-examples/kafka-consumer/newrelic/`
+
+Additionally, each service includes the `newrelic-api` as a gradle dependency.
 
 In order to report data to your New Relic account you are required to configure your `license_key` in the `newrelic.yml` or via 
 the environment variable `NEW_RELIC_LICENSE_KEY` for each service.
@@ -168,6 +170,9 @@ common: &default_settings
 ```
 
 ### Run services with the New Relic Java agent
+
+**Required**: The New Relic Java agent and API jars should both use the same version and both MUST be
+[version 6.4.0](https://docs.newrelic.com/docs/release-notes/agent-release-notes/java-release-notes/java-agent-640) or greater.
 
 Once each service has a configured license key you can start both of the services as follows:
 

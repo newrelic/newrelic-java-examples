@@ -2,7 +2,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.kafka:spring-kafka'
-    implementation files('/Users/jkeller/code/kafka-examples/kafka-producer/newrelic/newrelic-api-6.4.0-SNAPSHOT.jar')
+    implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
