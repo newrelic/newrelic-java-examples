@@ -1,0 +1,196 @@
+common: &default_settings
+  # ============================== SHORT LIVED APP CONFIG ======================
+  # settings that ensure short lived apps report data to APM
+  sync_startup: true
+  send_data_on_exit: true
+  send_data_on_exit_threshold: 0
+
+  # ============================== LICENSE/COLLECTOR ===========================
+  license_key: 'key'
+
+  # Uncomment to report to EU region collector
+  # host: collector.eu01.nr-data.net
+  # api_host: api.eu.newrelic.com
+
+  # ============================== AGENT/APP CONFIG ============================
+  app_name: kafka-producer
+
+  agent_enabled: true
+  high_security: false
+  ssl: true
+
+  enable_auto_app_naming: false
+  enable_auto_transaction_naming: true
+  max_stack_trace_lines: 30
+
+  # ============================ DISTRIBUTED TRACING ===========================
+  distributed_tracing:
+    enabled: true
+    exclude_newrelic_header: false
+
+  span_events:
+    enabled: true
+    attributes:
+      enabled: true
+      include: request.parameters.*, request.headers.*, request.uri
+    # max_samples_stored: 100
+
+  # ============================ LITE MODE =====================================
+  lite_mode: false
+
+  # ====================== JFR/Realtime Streaming ==============================
+  # jmx:
+  #   enabled: true
+  #   linkingMetadataMBean: true
+
+  # ============================ LOGGING =======================================
+  # off, severe, warning, info, fine, finer, finest
+  log_level: finest
+  audit_mode: true
+  log_file_count: 1
+  log_limit_in_kbytes: 0
+  log_daily: false
+  log_file_name: newrelic_agent.log
+  #log_file_path:
+
+  # ============================ PROXY =========================================
+  # proxy_host: localhost
+  # proxy_port: 8888
+  # proxy_user: username
+  # proxy_password: password
+
+  # ============================ ATTRIBUTES/PARAMETERS =========================
+  attributes:
+    enabled: true
+    include: request.parameters.*, request.headers.*, request.uri
+    # exclude: request.parameters.password
+
+  # ============================ TRANSACTION TRACER ============================
+  transaction_tracer:
+    enabled: true
+    transaction_threshold: 0.00001 # apdex_f
+    record_sql: raw
+    log_sql: false
+    stack_trace_threshold: 0.05
+    explain_enabled: true
+    explain_threshold: 0.05
+    top_n: 4
+
+  # ============================ ERROR COLLECTOR ===============================
+  error_collector:
+    enabled: true
+    ignore_errors: akka.actor.ActorKilledException
+
+  # ============================ EVENTS ========================================
+  transaction_events:
+    enabled: true
+    max_samples_stored: 2000
+
+  # ============================ CAT ===========================================
+  cross_application_tracer:
+    enabled: true
+
+  # ============================ THREAD PROFILER ===============================
+  thread_profiler:
+    enabled: true
+
+  # ============================ BROWSER =======================================
+  browser_monitoring:
+    auto_instrument: true
+
+  # ============================ CLASS TRANSFORMER =============================
+  class_transformer:
+    enabled: true
+
+    # enable distributed tracing for kafka
+    kafka-clients-spans:
+      enabled: true
+
+    # com.newrelic.instrumentation.tomcat-8.5.2:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.tomcat-request-listener:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.tomcat-jmx:
+    #   enabled: true
+
+    com.newrelic.instrumentation.servlet-user:
+      enabled: false
+
+    com.newrelic.instrumentation.spring-aop-2:
+      enabled: false
+
+    # com.newrelic.instrumentation.jdbc-h2:
+    #   enabled: false
+
+    # com.newrelic.instrumentation.httpurlconnection:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jax-rs-1.0:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jdbc-driver:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jdbc-generic:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jdbc-socket:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jersey-2:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.servlet-2.4:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.spring-4.2.0:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jdbc-mysql-3.0.8:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jdbc-mysql-6.0.2:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jdbc-mysql-connection-5.1.4:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jdbc-mysql-multihost-connections-5.1.3:
+    #   enabled: true
+
+    # com.newrelic.instrumentation.jdbc-mysql-multihost-connections-6.0.2:
+    #   enabled: true
+
+    # Classes loaded by classloaders in this list will not be instrumented.
+    # This is a useful optimization for runtimes which use classloaders to
+    # load dynamic classes which the agent would not instrument.
+    classloader_excludes:
+      groovy.lang.GroovyClassLoader$InnerLoader,
+      org.codehaus.groovy.runtime.callsite.CallSiteClassLoader,
+      com.collaxa.cube.engine.deployment.BPELClassLoader,
+      org.springframework.data.convert.ClassGeneratingEntityInstantiator$ObjectInstantiatorClassGenerator,
+      org.mvel2.optimizers.impl.asm.ASMAccessorOptimizer$ContextClassLoader,
+      gw.internal.gosu.compiler.SingleServingGosuClassLoader,
+
+  # ============================ LABELS ========================================
+  labels:
+  #label_name: label_value
+
+# ============================ APPLICATION ENVIRONMENTS ========================
+# Use -Dnewrelic.environment=<environment> on the Java startup command line
+development:
+  <<: *default_settings
+  app_name: My Application (Development)
+
+test:
+  <<: *default_settings
+  app_name: My Application (Test)
+
+production:
+  <<: *default_settings
+
+staging:
+  <<: *default_settings
+  app_name: My Application (Staging)
