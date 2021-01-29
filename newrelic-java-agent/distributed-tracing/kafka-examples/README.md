@@ -111,7 +111,7 @@ In this screenshot the `kafka-producer` and `kafka-consumer` services are connec
 
 ## Build
 
-Requires Java 8+  
+Requires Java 8+, Docker
 
 To build all artifacts run the following from the project root:  
 `./gradlew clean build`
@@ -122,18 +122,12 @@ Artifacts produced:
 
 ## Usage
 
-A number of scripts have been provided in the `kafka_2.13-2.6.0/` directory to streamline running Kafka. 
-
-1. Start zookeeper in its own terminal window:  
-   `./start-zookeeper.sh`
-2. Start the Kafka broker in its own terminal window:  
-    `./start-kafka.sh`
-3. Create a topic on the Kafka broker in new terminal window:  
-    `./create-topic.sh`
-4. [Run the Kafka producer and consumer services](#run-the-kafka-producer-and-consumer-services)
+1. Start zookeeper and kafka in a terminal window:
+    `docker-compose -f docker-compose.yml up`
+2. [Run the Kafka producer and consumer services](#run-the-kafka-producer-and-consumer-services)
     * `KafkaProducerApplication`
     * `KafkaConsumerApplication`
-5. Publish records to topic on the Kafka broker via one of the following options:  
+3. Publish records to topic on the Kafka broker via one of the following options:  
     * Directly execute the route (publishes a single record each time): http://localhost:8080/kafka/produce
     * Run `./produce-records.sh` in its own terminal window to batch `curl` the route
 
