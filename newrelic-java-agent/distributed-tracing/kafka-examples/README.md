@@ -107,7 +107,7 @@ Consuming Kafka Record:
 
 In this screenshot the `kafka-producer` and `kafka-consumer` services are connected in a single distributed trace.
 
-![distributed trace](kafka-distributed-trace.jpg)
+![distributed trace](kafka-distributed-trace.png)
 
 ## Build
 
