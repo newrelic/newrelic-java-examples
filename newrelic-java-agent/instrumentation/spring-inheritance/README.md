@@ -47,47 +47,48 @@ specified in the parent controller AND the HTTP method used for the request.
 To fully achieve the desired transaction name and avoid unexpected results, the inheritance must be removed
 and shared functionality used via composition.  This will achieve the most desirable results.
 
-## Parent controller example with issue
+## Build/Run with New Relic Java Agent
 
-Two `XxxChildController` classes inherit a root `GET` mapping in the `...inheritance` package.
+Update variables in the shell script, then run it.  (on Windows a similar .bat file could be easily fashioned)
 
-```
-curl http://localhost:8080/inherited/v1
-curl http://localhost:8080/inherited/v2
-```
-
-This exhibits unfavorable behavior of transactions names that do not include HTTP method and
-can negatively impact transaction names of the other endpoints.
-
-
-
-
-## Workaround with annotated parent controller example
-
-Same as above but the parent controller is annotated with `@RestController` and an arbitrary root pat is added.
-
-```
-curl http://localhost:8080/inherited2/v1
-curl http://localhost:8080/inherited2/v2
-```
-
+`./run.sh`
 
 ## Controllers sharing functionality via composition
 
 Two `Version#Controller` classes each have a root `GET` mapping in the `...composition` package.
 
 ```
-curl http://localhost:8080/composed/v1
-curl http://localhost:8080/composed/v2
+./runCompositionTests.sh
 ```
 
+## Workaround with annotated parent controller example
 
+Same as above but the parent controller is annotated with `@RestController` and an arbitrary root pat is added.
+
+```
+./runInheritanceWorkaroundTests.sh
+```
 
 The shared functionality has been refactored into a separate utility class `GetStuffAndDoThingsService`
 
+## Parent controller example with issue
+
+Two `XxxChildController` classes inherit a root `GET` mapping in the `...inheritance` package.
+
+```
+./runInheritanceFailureTests.sh
+```
+
+This exhibits unfavorable behavior of transactions names that do not include HTTP method and
+can negatively impact transaction names of the other endpoints.
+
+NOTE: After running this version, you may need to restart the app to get other instrumentation tests to work
+correctly as this situation can invalidate other endpoint instrumentation.
+
+
 ## History
 
-In early days of the Spring Framework the way you make a "controller" was to extend a Spring base controller class.
+In early days of the Spring Framework the way you made a "controller" was to extend a Spring base controller class.
 
 As this was found to be prohibitive and more designs increasingly chose to *Favor composition over inheritance* they began to use annotations.
 
