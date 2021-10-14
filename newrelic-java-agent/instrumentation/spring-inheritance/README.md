@@ -1,4 +1,4 @@
-# Base Controller Example
+# Spring Inheritance
 
 ## New Relic Agent Spring controller annotation instrumentation
 
