@@ -1,0 +1,9 @@
+-javaagent:libs/newrelic.jar
+-Dnewrelic.config.license_key=your-license-key
+-Dnewrelic.config.app_name=scala-api-examples
+-Dnewrelic.config.send_data_on_exit=true
+-Dnewrelic.config.send_data_on_exit_threshold=0
+-Dnewrelic.config.sync_startup=true
+-Dnewrelic.config.log_level=finest
+-Dnewrelic.config.audit_mode=true
+

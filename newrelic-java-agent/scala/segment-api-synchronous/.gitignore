@@ -1,0 +1,5 @@
+.bsp/
+.idea/
+target/
+logs/
+newrelic.jar
