@@ -33,8 +33,7 @@ Set the following based on which New Relic environment the APM account is associ
     ENV NEW_RELIC_EVENT_INGEST_URI=https://staging-insights-collector.newrelic.com/v1/accounts/events
     ```
 
-(OPTIONAL) Enable JFR monitoring for enhanced JVM details:
-* `ENV NEW_RELIC_JFR_ENABLED=true`
+(OPTIONAL) Enable JFR monitoring for enhanced JVM details: `ENV NEW_RELIC_JFR_ENABLED=true`
 
 See [Java agent configuration](https://docs.newrelic.com/docs/apm/agents/java-agent/configuration/java-agent-configuration-config-file/) for a complete list of config options.
 
@@ -42,22 +41,22 @@ See [Java agent configuration](https://docs.newrelic.com/docs/apm/agents/java-ag
 
 ### Option 1: Docker Compose
 
-Build and run:
+Build and run:  
 `docker-compose up -d`
 
-Stop:
+Stop:  
 `docker-compose down`
 
 ### Option 2: Docker Build/Run
 
-Build Docker Image:
+Build Docker Image:  
 `docker build --tag petclinic-app .`
 
-Run Docker Container:
+Run Docker Container:  
 `docker run -p 8080:8080 petclinic-app`
 
-Stop Docker Container:
-`docker ps`
+Stop Docker Container:  
+`docker ps`  
 `docker stop <CONTAINER ID>`
 
 ## Make a Request to the Petclinic Service
