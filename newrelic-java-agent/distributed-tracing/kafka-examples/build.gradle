@@ -24,7 +24,7 @@ subprojects {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.kafka:spring-kafka'
-        implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
+        implementation 'com.newrelic.agent.java:newrelic-api:8.8.0'
     }
 }
 

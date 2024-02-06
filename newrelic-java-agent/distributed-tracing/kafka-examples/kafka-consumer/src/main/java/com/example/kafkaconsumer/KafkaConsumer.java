@@ -60,6 +60,14 @@ public class KafkaConsumer implements CommandLineRunner {
                 consumerRecord.offset());
 
         acceptDistributedTraceHeadersFromKafkaRecord(consumerRecord);
+
+        // try {
+        //    Thread.sleep(500);  // Sleep for 1 second
+        // } catch (InterruptedException e) {
+        //     Thread.currentThread().interrupt();  // set the interrupt flag
+        //     System.out.println("Thread was interrupted, Failed to complete operation");
+        // }
+        
     }
 
     /**
@@ -69,7 +77,7 @@ public class KafkaConsumer implements CommandLineRunner {
      *
      * @param record Kafka record
      */
-    @Trace
+    @Trace(dispatcher = true)
     private static void acceptDistributedTraceHeadersFromKafkaRecord(ConsumerRecord<String, String> record) {
         // ConcurrentHashMapHeaders provides a concrete implementation of com.newrelic.api.agent.Headers
         Headers distributedTraceHeaders = ConcurrentHashMapHeaders.build(HeaderType.MESSAGE);
