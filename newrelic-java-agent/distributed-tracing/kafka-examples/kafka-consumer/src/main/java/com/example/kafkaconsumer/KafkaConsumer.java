@@ -60,14 +60,6 @@ public class KafkaConsumer implements CommandLineRunner {
                 consumerRecord.offset());
 
         acceptDistributedTraceHeadersFromKafkaRecord(consumerRecord);
-
-        // try {
-        //    Thread.sleep(500);  // Sleep for 1 second
-        // } catch (InterruptedException e) {
-        //     Thread.currentThread().interrupt();  // set the interrupt flag
-        //     System.out.println("Thread was interrupted, Failed to complete operation");
-        // }
-        
     }
 
     /**
