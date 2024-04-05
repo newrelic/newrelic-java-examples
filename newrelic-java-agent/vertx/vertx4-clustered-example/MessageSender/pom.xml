@@ -11,7 +11,7 @@
 
     <properties>
         <!-- changing this to 3.4.2 will break the multipart test -->
-        <vertx.version>4.3.2</vertx.version>
+        <vertx.version>4.3.8</vertx.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
