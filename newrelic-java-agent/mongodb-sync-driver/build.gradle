@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.newrelic'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.mongodb:mongodb-driver-sync:5.2.0'
+    implementation 'com.newrelic.agent.java:newrelic-api:8.15.0'
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
