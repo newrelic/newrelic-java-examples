@@ -7,9 +7,6 @@ buildscript {
         classpath 'com.gradleup.shadow:shadow-gradle-plugin:9.0.0-beta17'
     }
 }
-// `apply plugin` stuffs are used with `buildscript`.
-//apply plugin: 'java'
-//apply plugin: 'com.gradleup.shadow'
 
 plugins {
     id 'java'
