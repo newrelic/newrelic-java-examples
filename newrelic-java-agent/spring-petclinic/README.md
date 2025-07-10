@@ -81,16 +81,22 @@ This section will walk through getting the Spring PetClinic Java application run
 
 First, we need a Java application that we can run locally to experiment with. In this tutorial, we'll be using the classic [Spring PetClinic](https://github.com/spring-projects/spring-petclinic) demo application.
 
-Let's clone the project by running the following command in the terminal:
+Let's clone the [newrelic-java-examples](https://github.com/newrelic/newrelic-java-examples) repository, which contains a copy of Spring PetClinic, by running the following command in the terminal:
 ```bash
-git clone https://github.com/spring-projects/spring-petclinic.git 
+git clone https://github.com/newrelic/newrelic-java-examples.git
+```
+
+This will create a new directory named `newrelic-java-examples` in the current working directory. From the current working directory we can navigate into the `newrelic-java-examples/newrelic-java-agent/spring-petclinic/` directory to find the Spring PetClinic project that we'll be working with throughout this demo.
+
+```bash
+cd newrelic-java-examples/newrelic-java-agent/spring-petclinic/
 ```
 
 ### Build the Spring PetClinic Java Application
 
 Next, let's build the application so that we have an executable jar file that can be run.
 
-In the terminal, navigate into the `spring-petclinic` directory for the newly cloned project and execute the maven `package` command to trigger the build process:
+Now that we've navigated into the `spring-petclinic` directory for the newly cloned project let's execute the maven `package` command in the terminal to trigger the build process:
 ```bash
 cd spring-petclinic
 ./mvnw -DskipTests package
