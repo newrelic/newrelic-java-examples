@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.newrelic.TryDax'
+    }
+}
+
+shadowJar {
+    archiveBaseName.set('dax-test')
+    archiveClassifier.set('all')
+    archiveVersion.set(version)
+}
+
+group = 'com.newrelic'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation('software.amazon.dax:amazon-dax-client:2.0.8')
+    implementation('com.newrelic.agent.java:newrelic-api:9.2.0')
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
