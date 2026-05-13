@@ -80,4 +80,5 @@ done
 grep -c "IllegalAccessError" target/newrelic-agent.log   # should be 0
 ```
 
-# Note: currently the fix variant will cause the instrumentation to hang after making a call, this is being actively working on by Labs.
+> [!NOTE]
+> Currently the fix variant will cause the instrumentation to hang after making a call, this is being actively worked on by Labs.
