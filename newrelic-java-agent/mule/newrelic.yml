@@ -1,0 +1,19 @@
+common: &default_settings
+
+  license_key: '<YOUR_LICENSE_KEY>'
+
+  agent_enabled: true
+
+  app_name: mule-repro
+
+  enable_auto_app_naming: true
+
+  enable_auto_transaction_naming: true
+
+  log_level: fine
+
+  log_file_name: newrelic-agent.log
+
+environments:
+  development:
+    <<: *default_settings

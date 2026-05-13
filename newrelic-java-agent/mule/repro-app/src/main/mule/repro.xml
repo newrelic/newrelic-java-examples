@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Reproduction flow for:
+
+      IllegalAccessError: class org.mule.runtime.core.internal.event.AbstractEventContext
+      (in module org.mule.runtime.core) cannot access class
+      com.newrelic.weave...AbstractEventContext_xxx_nr_ext (in unnamed module)
+      because module org.mule.runtime.core does not read unnamed module
+
+    Root cause: the NR agent weaves classes in named JPMS modules (org.mule.runtime.core,
+    org.mule.runtime.api, org.mule.runtime.core.components) and injects synthetic _nr_ext
+    helper classes into the *unnamed* module. JPMS forbids named → unnamed module access,
+    so every request that drives these execution paths throws.
+
+    The flow exercises the following classes to maximise JPMS boundary crossings:
+
+      TryScope             — <try> wrapper around the main processing chain
+      ChoiceRouter         — <choice> branch in validateSubFlow
+      ScatterGatherRouter  — <scatter-gather> in parallelEnrichSubFlow
+      Foreach/ForeachRouter — <foreach> iteration in transformSubFlow
+      AsynchronousRetryTemplate/RetryWorker — HTTP to unreachable port in retryProbeSubFlow
+
+    Baseline (no JPMS fix): all router/scope classes produce IllegalAccessErrors.
+    Fix agent: no IllegalAccessErrors.
+-->
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core
+        http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http
+        http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/core
+        http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+        <http:listener-connection host="0.0.0.0" port="8081"/>
+    </http:listener-config>
+
+    <!-- Exercises ExecutionMediator, DefaultExecutionContext, ComponentExecutor -->
+    <http:request-config name="Downstream_HTTP" doc:name="Internal Downstream HTTP">
+        <http:request-connection host="localhost" port="8081"/>
+    </http:request-config>
+
+    <!-- Port 9999 is never open — forces AsynchronousRetryTemplate + RetryWorker -->
+    <http:request-config name="Unreachable_HTTP" doc:name="Unreachable Retry Probe HTTP">
+        <http:request-connection host="localhost" port="9999">
+            <reconnection>
+                <reconnect count="1" frequency="100"/>
+            </reconnection>
+        </http:request-connection>
+    </http:request-config>
+
+    <flow name="reproFlow" doc:name="reproFlow">
+        <http:listener config-ref="HTTP_Listener_config" path="/repro"
+                       doc:name="Listener"/>
+
+        <set-variable variableName="requestId"
+                      value="#[correlationId]"
+                      doc:name="Set Request ID"/>
+
+        <!-- TryScope: org.mule.runtime.core.components.TryScope -->
+        <try doc:name="Main Processing">
+
+            <flow-ref name="validateSubFlow"       doc:name="Validate Request"/>
+            <flow-ref name="parallelEnrichSubFlow" doc:name="Parallel Enrich"/>
+            <flow-ref name="transformSubFlow"      doc:name="Transform Payload"/>
+            <flow-ref name="retryProbeSubFlow"     doc:name="Retry Probe"/>
+            <flow-ref name="buildResponseSubFlow"  doc:name="Build Response"/>
+
+            <error-handler>
+                <on-error-continue type="MULE:CONNECTIVITY" doc:name="Handle Connectivity Error">
+                    <logger level="WARN"
+                            message='#["[error] connectivity: " ++ (error.description default "unknown")]'
+                            doc:name="Log Connectivity Error"/>
+                </on-error-continue>
+            </error-handler>
+        </try>
+    </flow>
+
+    <!-- ChoiceRouter: org.mule.runtime.core.components.ChoiceRouter -->
+    <sub-flow name="validateSubFlow" doc:name="validateSubFlow">
+        <logger level="INFO"
+                message='#["[validate] requestId=" ++ vars.requestId]'
+                doc:name="Log Validate"/>
+
+        <choice doc:name="Route by Processing Mode">
+            <when expression="#[(attributes.queryParams.mode default 'standard') == 'fast']">
+                <set-variable variableName="processingMode" value="fast"     doc:name="Mode: fast"/>
+            </when>
+            <otherwise>
+                <set-variable variableName="processingMode" value="standard" doc:name="Mode: standard"/>
+            </otherwise>
+        </choice>
+
+        <set-variable variableName="validated" value="true" doc:name="Mark Validated"/>
+    </sub-flow>
+
+    <!-- ScatterGatherRouter: org.mule.runtime.core.components.ScatterGatherRouter -->
+    <sub-flow name="parallelEnrichSubFlow" doc:name="parallelEnrichSubFlow">
+        <scatter-gather doc:name="Parallel Enrichment">
+            <route>
+                <logger level="DEBUG"
+                        message='#["[scatter] route-A: geo-check for " ++ vars.requestId]'
+                        doc:name="Route A"/>
+            </route>
+            <route>
+                <!-- Also exercises the Mule extensions pipeline in org.mule.runtime.module.extension.* -->
+                <http:request method="GET" config-ref="Downstream_HTTP" path="/downstream"
+                              doc:name="Route B: HTTP Connector"/>
+            </route>
+        </scatter-gather>
+
+        <set-payload value="#[null]" doc:name="Clear Scatter Result"/>
+    </sub-flow>
+
+    <!-- Foreach + ForeachRouter: org.mule.runtime.core.components.Foreach -->
+    <sub-flow name="transformSubFlow" doc:name="transformSubFlow">
+        <foreach collection="#[['tag-A', 'tag-B', 'tag-C']]" doc:name="Iterate Tags">
+            <logger level="DEBUG"
+                    message='#["[foreach] processing " ++ payload]'
+                    doc:name="Log Tag"/>
+        </foreach>
+
+        <ee:transform doc:name="Build JSON Body">
+            <ee:message>
+                <ee:set-payload><![CDATA[
+                    %dw 2.0
+                    output application/json
+                    ---
+                    {
+                        requestId      : vars.requestId,
+                        validated      : vars.validated,
+                        processingMode : vars.processingMode,
+                        processedAt    : now() as String
+                    }
+                ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <logger level="INFO"
+                message='#["[transform] mode=" ++ vars.processingMode ++ " requestId=" ++ vars.requestId]'
+                doc:name="Log Transform"/>
+    </sub-flow>
+
+    <sub-flow name="buildResponseSubFlow" doc:name="buildResponseSubFlow">
+        <set-variable variableName="responseReady" value="true" doc:name="Mark Response Ready"/>
+        <logger level="INFO"
+                message='#["[response] ready=" ++ vars.responseReady ++ " mode=" ++ vars.processingMode]'
+                doc:name="Log Response"/>
+    </sub-flow>
+
+    <!--
+        AsynchronousRetryTemplate + RetryWorker: org.mule.runtime.core (named JPMS module).
+        Connectivity error is absorbed here so the outer flow still completes and produces a trace.
+    -->
+    <sub-flow name="retryProbeSubFlow" doc:name="retryProbeSubFlow">
+        <try doc:name="Retry Probe">
+            <http:request method="GET" config-ref="Unreachable_HTTP" path="/probe"
+                          doc:name="Unreachable Probe"/>
+            <error-handler>
+                <on-error-continue type="MULE:CONNECTIVITY"
+                                   doc:name="Absorb Expected Connectivity Error">
+                    <logger level="DEBUG"
+                            message="[retry-probe] MULE:CONNECTIVITY absorbed after reconnect"
+                            doc:name="Log Expected Failure"/>
+                </on-error-continue>
+            </error-handler>
+        </try>
+    </sub-flow>
+
+    <!-- Target for the HTTP connector in parallelEnrichSubFlow -->
+    <flow name="downstreamFlow" doc:name="downstreamFlow">
+        <http:listener config-ref="HTTP_Listener_config" path="/downstream"
+                       doc:name="Downstream Listener"/>
+        <set-payload value='#[output application/json --- {status: "ok"}]'
+                     doc:name="Downstream OK Response"/>
+    </flow>
+
+</mule>
