@@ -22,9 +22,7 @@ The `repro-app` flow exercises five instrumented classes to maximise boundary cr
 
 ## Prerequisites
 
-Place the following files before running — see the `.gitkeep` in each directory for details:
-
-| `mule-ee-distribution-standalone-4.9.11.zip` | `runtime/` |
+Place `mule-ee-distribution-standalone-4.9.11.zip` in the `runtime` directory before proceeding.
 
 **JDK 17 is required.** `mule-maven-plugin` validates the JVM version at build time.
 If your `JAVA_HOME` is not JDK 17, pass the path explicitly:
