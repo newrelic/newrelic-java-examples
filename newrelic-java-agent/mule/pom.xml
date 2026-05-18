@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.newrelic.mule</groupId>
+    <artifactId>mule-repro</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Mule 4.9 + New Relic Java Agent Reproduction</name>
+    <description>
+        Reproduces an IllegalAccessError issue when running Mule 4.9 + JDK 17 with the New Relic Java agent
+    </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!--
+            Mule 4.9.11 runtime. Override on CLI: mvn package -Dmule.home=/path/to/mule-enterprise-standalone-4.9.11
+            Place mule-ee-distribution-standalone-4.9.11.zip in runtime/ for auto-extraction.
+        -->
+        <mule.home>${project.basedir}/runtime/mule-enterprise-standalone-4.9.11</mule.home>
+        <mule.zip>${project.basedir}/runtime/mule-ee-distribution-standalone-4.9.11.zip</mule.zip>
+
+        <!-- Baseline NR agent (reproduces the issues). Place jar in vendor/newrelic/. -->
+        <newrelic.agent.jar>${project.basedir}/vendor/newrelic/newrelic.jar</newrelic.agent.jar>
+        <!-- Fix candidate agent. Place jar in vendor/newrelic/. -->
+        <newrelic.agent.jar.fix>${project.basedir}/vendor/newrelic/newrelic-fix.jar</newrelic.agent.jar.fix>
+        <newrelic.config.file>${project.basedir}/newrelic.yml</newrelic.config.file>
+
+        <!-- Built Mule application JAR -->
+        <mule.app.repro>${project.basedir}/repro-app/target/repro-app-1.0.0-SNAPSHOT-mule-application.jar</mule.app.repro>
+
+        <!--
+            Path to JDK 17. Required. mule-maven-plugin validates the JVM version.
+            Defaults to JAVA_HOME. If that is not JDK 17, override:
+            mvn package -Djava.home.17=/path/to/jdk17
+        -->
+        <java.home.17>${env.JAVA_HOME}</java.home.17>
+    </properties>
+
+    <build>
+        <plugins>
+            <!--
+                Build the Mule reproduction app from source.
+                mule-maven-plugin requires JDK 17 for Mule 4.9.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>build-repro-app</id>
+                        <phase>package</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${maven.home}/bin/mvn</executable>
+                            <workingDirectory>${project.basedir}/repro-app</workingDirectory>
+                            <environmentVariables>
+                                <JAVA_HOME>${java.home.17}</JAVA_HOME>
+                            </environmentVariables>
+                            <arguments>
+                                <argument>package</argument>
+                                <argument>-q</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                Unpack the Mule 4.9.11 distribution and overlay wrapper.conf with the NR
+                agent configured. Token placeholders in conf/wrapper.conf are resolved here.
+                The extraction is skipped if the directory already exists.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>setup-mule</id>
+                        <phase>package</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <target>
+                                <unzip src="${mule.zip}" dest="${project.basedir}/runtime"
+                                       overwrite="false"/>
+                                <chmod dir="${mule.home}/bin" perm="755" includes="*"/>
+                                <copy file="${project.basedir}/conf/wrapper.conf"
+                                      todir="${mule.home}/conf" overwrite="true">
+                                    <filterset>
+                                        <filter token="newrelic.agent.jar"     value="${newrelic.agent.jar}"/>
+                                        <filter token="newrelic.config.file"   value="${newrelic.config.file}"/>
+                                        <filter token="newrelic.log.dir"       value="${project.basedir}/target"/>
+                                        <filter token="java.home.17"           value="${java.home.17}"/>
+                                    </filterset>
+                                </copy>
+                                <!-- Mule 4 EE requires a default domain to exist -->
+                                <mkdir dir="${mule.home}/domains/default"/>
+                                <echo file="${mule.home}/domains/default/mule-domain-config.xml"
+                                      append="false">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;domain xmlns="http://www.mulesoft.org/schema/mule/domain"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.mulesoft.org/schema/mule/domain
+            http://www.mulesoft.org/schema/mule/domain/current/mule-domain.xsd"&gt;
+&lt;/domain&gt;</echo>
+                                <!-- Deploy the reproduction app -->
+                                <copy file="${mule.app.repro}"
+                                      todir="${mule.home}/apps" overwrite="true"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

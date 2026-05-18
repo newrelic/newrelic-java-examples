@@ -1,0 +1,2 @@
+# Place mule-ee-distribution-standalone-4.9.11.zip here.
+# `mvn package` extracts it automatically.

@@ -1,0 +1,7 @@
+# Mule runtime
+runtime/mule-enterprise-standalone-*/
+runtime/*.zip
+
+# Build output
+target/
+repro-app/target/
