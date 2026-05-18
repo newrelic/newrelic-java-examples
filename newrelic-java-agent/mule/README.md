@@ -30,6 +30,43 @@ If your `JAVA_HOME` is not JDK 17, pass the path explicitly:
 mvn package -Djava.home.17=/path/to/jdk17
 ```
 
+### MuleSoft Maven plugin dependencies
+
+`mule-maven-plugin` and its dependencies live on `repository.mulesoft.org`, not Maven
+Central. The `repro-app/.mvn/settings.xml` registers that repository so they download
+automatically on a clean cache.
+
+If downloads fail, install the artifacts manually:
+
+```bash
+BASE=https://repository.mulesoft.org/releases/org/mule/tools/maven
+
+for artifact in \
+  "mule-maven-plugin/4.7.0/mule-maven-plugin-4.7.0" \
+  "mule-packager/4.7.0/mule-packager-4.7.0" \
+  "mule-deployer/4.7.0/mule-deployer-4.7.0" \
+  "mule-classloader-model/4.7.0/mule-classloader-model-4.7.0" \
+  "exchange-mule-plugin-utils/0.1.4/exchange-mule-plugin-utils-0.1.4"
+do
+  name=$(basename $artifact)
+  curl -sL "$BASE/$artifact.pom" -o /tmp/$name.pom
+  curl -sL "$BASE/$artifact.jar" -o /tmp/$name.jar
+  mvn install:install-file -Dfile=/tmp/$name.jar -DpomFile=/tmp/$name.pom -q
+done
+
+curl -sL "$BASE/mule-artifact-tools/4.7.0/mule-artifact-tools-4.7.0.pom" \
+     -o /tmp/mule-artifact-tools-4.7.0.pom
+mvn install:install-file \
+  -Dfile=/tmp/mule-artifact-tools-4.7.0.pom \
+  -DpomFile=/tmp/mule-artifact-tools-4.7.0.pom \
+  -DgroupId=org.mule.tools.maven \
+  -DartifactId=mule-artifact-tools \
+  -Dversion=4.7.0 \
+  -Dpackaging=pom -q
+```
+
+If further artifacts require installation, use a pattern similar to that referenced above.
+
 ## Error scenario (baseline agent)
 
 ```bash
