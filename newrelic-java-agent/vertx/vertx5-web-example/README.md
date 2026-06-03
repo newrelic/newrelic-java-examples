@@ -65,7 +65,7 @@ curl http://localhost:8080/api/greet/Alice
 curl http://localhost:8080/api/chain
 
 # 4. Blocking handler: exercises BlockingHandlerDecorator
-curl "http://localhost:8080/api/blocking/heavy-work"
+curl http://localhost:8080/api/blocking/heavy-work
 
 # 5. executeBlocking(Callable): exercises ContextImpl + CallableWrapper
 #    (single-arg delegates to the instrumented two-arg form with ordered=true)
