@@ -1,0 +1,62 @@
+common: &default_settings
+
+  license_key: '<INSERT LICENSE KEY HERE>'
+
+  app_name: vertx5-web-example
+
+  agent_enabled: true
+
+  log_level: info
+
+  audit_mode: false
+
+  log_file_count: 1
+
+  log_limit_in_kbytes: 0
+
+  log_daily: false
+
+  log_file_name: newrelic_agent.log
+
+  log_file_path: logs
+
+  high_security: false
+
+  enable_auto_app_naming: false
+
+  enable_auto_transaction_naming: true
+
+  transaction_tracer:
+    enabled: true
+    transaction_threshold: apdex_f
+    record_sql: raw
+    log_sql: false
+    stack_trace_threshold: 0.5
+    explain_enabled: false
+    explain_threshold: 0.5
+    top_n: 20
+
+  error_collector:
+    enabled: true
+    ignore_errors: akka.actor.ActorKilledException
+    ignore_status_codes: 404
+
+  transaction_events:
+    enabled: true
+    max_samples_stored: 2000
+
+  distributed_tracing:
+    enabled: true
+
+  cross_application_tracer:
+    enabled: false
+
+  thread_profiler:
+    enabled: true
+
+production:
+  <<: *default_settings
+
+development:
+  <<: *default_settings
+  app_name: vertx5-web-example (development)
