@@ -1,0 +1,50 @@
+plugins {
+    id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '2.2.0'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.2.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+def ktorVersion = '3.5.1'
+def coroutinesVersion = '1.9.0'
+
+dependencies {
+    implementation "io.ktor:ktor-server-core-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-server-netty-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion"
+
+    implementation "io.ktor:ktor-client-core-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-client-cio-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    mainClass = 'com.example.ktor.AppKt'
+
+    if (project.hasProperty('agent')) {
+        def agentJar = project.hasProperty('agentJar')
+            ? project.property('agentJar')
+            : file('newrelic/newrelic.jar').absolutePath
+        def configFile = project.hasProperty('agentConfig')
+            ? project.property('agentConfig')
+            : file('newrelic/newrelic.yml').absolutePath
+        applicationDefaultJvmArgs = [
+            "-javaagent:${agentJar}",
+            "-Dnewrelic.config.file=${configFile}",
+            "-Dnewrelic.config.class_transformer.clear_return_stacks=true",
+        ]
+    }
+}
