@@ -1,0 +1,27 @@
+common: &default_settings
+  license_key: 'INSERT_YOUR_LICENSE_KEY_HERE'
+
+  app_name: ktor-example
+
+  log_level: fine
+
+  distributed_tracing:
+    enabled: true
+
+  transaction_tracer:
+    enabled: true
+    transaction_threshold: apdex_f
+
+  error_collector:
+    enabled: true
+
+development:
+  <<: *default_settings
+  app_name: ktor-example (Development)
+
+test:
+  <<: *default_settings
+  app_name: ktor-example (Test)
+
+production:
+  <<: *default_settings
