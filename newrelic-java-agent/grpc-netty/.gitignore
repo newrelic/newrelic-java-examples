@@ -1,0 +1,6 @@
+build/
+.gradle/
+newrelic/newrelic.jar
+newrelic/logs/
+newrelic/newrelic_agent.log
+*.class
