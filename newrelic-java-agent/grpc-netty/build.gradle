@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
+    }
+}
+
+plugins {
+    id 'application'
+}
+
+apply plugin: 'com.google.protobuf'
+
+repositories {
+    mavenCentral()
+}
+
+def grpcVersion = '1.75.0'
+def protobufVersion = '3.25.8'
+
+dependencies {
+    implementation "io.grpc:grpc-netty:${grpcVersion}"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+
+    compileOnly "org.apache.tomcat:annotations-api:6.0.53"
+
+    compileOnly "com.newrelic.agent.java:newrelic-api:8.21.0"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+application {
+    mainClass = 'com.example.grpcnetty.Main'
+
+    if (project.hasProperty('agent')) {
+        def agentJar = project.hasProperty('agentJar')
+            ? project.property('agentJar')
+            : file('newrelic/newrelic.jar').absolutePath
+        def configFile = project.hasProperty('agentConfig')
+            ? project.property('agentConfig')
+            : file('newrelic/newrelic.yml').absolutePath
+
+        def jvmArgs = [
+            "-javaagent:${agentJar}",
+            "-Dnewrelic.config.file=${configFile}",
+            "-Dnewrelic.config.class_transformer.clear_return_stacks=true",
+        ]
+
+        if (project.hasProperty('debug')) {
+            jvmArgs << "-Dnewrelic.debug=true"
+        }
+
+        applicationDefaultJvmArgs = jvmArgs
+    }
+}

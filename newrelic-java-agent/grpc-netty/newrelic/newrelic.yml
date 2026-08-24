@@ -1,0 +1,53 @@
+common: &default_settings
+  license_key: 'INSERT_YOUR_LICENSE_KEY_HERE'
+
+  app_name: grpc-netty
+
+  log_level: finest
+
+  distributed_tracing:
+    enabled: true
+
+  transaction_tracer:
+    enabled: true
+    transaction_threshold: apdex_f
+
+  error_collector:
+    enabled: true
+
+  grpc:
+    distributed_tracing:
+      enabled: true
+    errors:
+      enabled: true
+
+  netty:
+    http2:
+      frame_read_listener:
+        start_transaction: true
+
+  transaction_events:
+    custom_request_headers:
+      - header_name: 'x-example-request-id'
+        header_alias: 'exampleRequestId'
+
+  class_transformer:
+    com.newrelic.instrumentation.grpc-1.4.0:
+      enabled: false
+    com.newrelic.instrumentation.grpc-1.22.0:
+      enabled: false
+    com.newrelic.instrumentation.grpc-1.30.0:
+      enabled: false
+    com.newrelic.instrumentation.grpc-1.40.0:
+      enabled: false
+
+development:
+  <<: *default_settings
+  app_name: grpc-netty (Development)
+
+test:
+  <<: *default_settings
+  app_name: grpc-netty (Test)
+
+production:
+  <<: *default_settings
