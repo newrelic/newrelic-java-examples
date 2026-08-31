@@ -1,0 +1,7 @@
+micronaut:
+  application:
+    name: micronaut-example
+  server:
+    port: 8080
+    netty:
+      max-chunk-size: 512
